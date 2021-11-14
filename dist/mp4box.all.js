@@ -2679,6 +2679,8 @@ BoxParser.createSampleEntryCtor(BoxParser.SAMPLE_ENTRY_TYPE_VISUAL, "avc4");
 BoxParser.createSampleEntryCtor(BoxParser.SAMPLE_ENTRY_TYPE_VISUAL, "av01");
 BoxParser.createSampleEntryCtor(BoxParser.SAMPLE_ENTRY_TYPE_VISUAL, "hvc1");
 BoxParser.createSampleEntryCtor(BoxParser.SAMPLE_ENTRY_TYPE_VISUAL, "hev1");
+BoxParser.createSampleEntryCtor(BoxParser.SAMPLE_ENTRY_TYPE_VISUAL, "vp08");
+BoxParser.createSampleEntryCtor(BoxParser.SAMPLE_ENTRY_TYPE_VISUAL, "vp09");
 BoxParser.createSampleEntryCtor(BoxParser.SAMPLE_ENTRY_TYPE_AUDIO, 	"mp4a");
 BoxParser.createSampleEntryCtor(BoxParser.SAMPLE_ENTRY_TYPE_AUDIO, 	"ac-3");
 BoxParser.createSampleEntryCtor(BoxParser.SAMPLE_ENTRY_TYPE_AUDIO, 	"ec-3");
@@ -2690,8 +2692,6 @@ BoxParser.createEncryptedSampleEntryCtor(BoxParser.SAMPLE_ENTRY_TYPE_SUBTITLE, 	
 BoxParser.createEncryptedSampleEntryCtor(BoxParser.SAMPLE_ENTRY_TYPE_SYSTEM, 	"encs");
 BoxParser.createEncryptedSampleEntryCtor(BoxParser.SAMPLE_ENTRY_TYPE_TEXT, 		"enct");
 BoxParser.createEncryptedSampleEntryCtor(BoxParser.SAMPLE_ENTRY_TYPE_METADATA, 	"encm");
-
-
 // file:src/parsing/a1lx.js
 BoxParser.createBoxCtor("a1lx", function(stream) {
 	var large_size = stream.readUint8() & 1;
@@ -4920,6 +4920,20 @@ BoxParser.stxtSampleEntry.prototype.getCodec = function() {
 	}
 }
 
+BoxParser.vp08SampleEntry.prototype.getCodec =
+BoxParser.vp09SampleEntry.prototype.getCodec = function() {
+	var baseCodec = BoxParser.SampleEntry.prototype.getCodec.call(this);
+	var level = this.vpcC.level;
+	if (level == 0) {
+		level = "00";
+	}
+	var bitDepth = this.vpcC.bitDepth;
+	if (bitDepth == 8) {
+		bitDepth = "08";
+	}
+	return baseCodec + ".0" + this.vpcC.profile + "." + level + "." + bitDepth;
+}
+
 BoxParser.av01SampleEntry.prototype.getCodec = function() {
 	var baseCodec = BoxParser.SampleEntry.prototype.getCodec.call(this);
 	var bitdepth;
@@ -4931,8 +4945,6 @@ BoxParser.av01SampleEntry.prototype.getCodec = function() {
 	// TODO need to parse the SH to find color config
 	return baseCodec+"."+this.av1C.seq_profile+"."+this.av1C.seq_level_idx_0+(this.av1C.seq_tier_0?"H":"M")+"."+bitdepth;//+"."+this.av1C.monochrome+"."+this.av1C.chroma_subsampling_x+""+this.av1C.chroma_subsampling_y+""+this.av1C.chroma_sample_position;
 }
-
-
 // file:src/box-write.js
 /* 
  * Copyright (c) Telecom ParisTech/TSI/MM/GPAC Cyril Concolato
